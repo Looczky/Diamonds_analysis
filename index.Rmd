@@ -2,6 +2,7 @@
 
 ```{r}
 library(ggplot2)
+library(gridExtra)
 
 diamonds <- read.csv('diamonds.csv',colClasses=c(X='NULL'))
 ```
@@ -25,9 +26,28 @@ diamonds$volume <- diamonds$x * diamonds$y * diamonds$z
 
 ```
 
-## Wykres 
+## Zależność wagi (w karatach) od ceny
 
 ```{r}
 ggplot(diamonds, aes(carat, price))+
-  geom_point()
+  geom_point()+
+  geom_smooth(method='lm')
 ```
+
+Na powyższym wykresie widoczna jest zależność co najmniej liniowa ceny od wagi.
+
+Do wykresu możemy uwzględnić różne zmienne, kolorując odpowiednio poszczególne wyniki:
+
+```{r}
+
+plot1_color <- ggplot(diamonds, aes(carat, price,color=color))+
+  geom_point()
+plot1_cut <- ggplot(diamonds, aes(carat, price,color=cut))+
+  geom_point()
+plot1_clarity <- ggplot(diamonds, aes(carat, price,color=clarity))+
+  geom_point()
+
+grid.arrange(plot1_color,plot1_cut,plot1_clarity,nrow=3)
+```
+
+#hipoteza 1
