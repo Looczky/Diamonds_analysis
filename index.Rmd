@@ -1,0 +1,33 @@
+# Import bibliotek i danych
+
+```{r}
+library(ggplot2)
+
+diamonds <- read.csv('diamonds.csv',colClasses=c(X='NULL'))
+```
+
+# Analiza eksploracyjna
+
+```{r}
+str(diamonds)
+nrow(diamonds)
+sum(is.na(diamonds)) # brak NA
+```
+
+## Wstępne przekształcenia zmiennych
+
+```{r}
+diamonds$cut <- factor(diamonds$cut)
+diamonds$color <- factor(diamonds$color)
+diamonds$clarity <- factor(diamonds$clarity)
+
+diamonds$volume <- diamonds$x * diamonds$y * diamonds$z
+
+```
+
+## Wykres 
+
+```{r}
+ggplot(diamonds, aes(carat, price))+
+  geom_point()
+```
