@@ -12,7 +12,6 @@ View(diamonds)
 str(diamonds)
 nrow(diamonds)
 sum(is.na(diamonds))
-diamonds <- na.omit(diamonds)
 
 diamonds$cut <- factor(diamonds$cut)
 diamonds$color <- factor(diamonds$color)
