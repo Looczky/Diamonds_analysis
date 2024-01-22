@@ -3,7 +3,7 @@ library(ggplot2)
 diamonds <- read.csv('diamonds.csv',colClasses=c(X='NULL'))
 
 # chyba bedzie to trzeba bardziej rozwinac 
-# Hipoteza 1: wielkość diamentu nie ma wpływu na jego jakość.
+# Hipoteza 1: Wielkość diamentu nie ma wpływu na jego jakość.
 # Hipoteza 2: cena diamentu zależy od koloru.
 # Hipoteza 3  Wraz ze zwiększeniem się zmiennej 'tables' rośnie cena diamentu.
 
@@ -12,15 +12,13 @@ View(diamonds)
 str(diamonds)
 nrow(diamonds)
 sum(is.na(diamonds))
-diamonds <- na.omit(diamonds)
+
 
 diamonds$cut <- factor(diamonds$cut)
 diamonds$color <- factor(diamonds$color)
 diamonds$clarity <- factor(diamonds$clarity)
 
 diamonds
-
-diamonds$volume <- diamonds$x * diamonds$y * diamonds$z
 
 ggplot(diamonds,aes(x=cut,fill=cut))+
   geom_bar()+
@@ -38,19 +36,18 @@ ggplot(diamonds,aes(x=clarity,fill=color))+
   scale_y_continuous(labels = scales::percent_format(scale = 1))
 
 
-diamonds$table_group <- cut(diamonds$table, breaks=seq(min(diamonds$table),max(diamonds$table),by=4),include.lowest = TRUE)
-ggplot(diamonds, aes(x = table_group,y=price,fill=table_group)) +
-  geom_boxplot()
+# diamonds$table_group <- cut(diamonds$table, breaks=seq(min(diamonds$table),max(diamonds$table),by=4),include.lowest = TRUE)
+# ggplot(diamonds, aes(x = table_group,y=price,fill=table_group)) +
+#   geom_boxplot()
 
-ggplot(diamonds,aes(carat,volume,color=color))+
-  geom_point()
+# ggplot(diamonds,aes(carat,volume,color=color))+
+#   geom_point()
 
-ggplot(diamonds,aes(price,volume,color=cut))+
-  geom_point()
+# ggplot(diamonds,aes(price,volume,color=cut))+
+#   geom_point()
 
 ggplot(diamonds,aes(depth,price,color=cut))+
   geom_point()
-
 
 ggplot(data=diamonds,aes(cut,price,fill=cut))+
   geom_boxplot()
@@ -58,9 +55,11 @@ ggplot(data=diamonds,aes(cut,price,fill=cut))+
 ggplot(data=diamonds,aes(clarity,price,fill=clarity))+
   geom_boxplot()
 
-ggplot(data=diamonds,aes(color,price,fill=color))+
+ggplot(data=diamonds,aes(color, price, fill=color))+
   geom_boxplot()
 
+ggplot(diamonds, aes(carat, price, color=clarity))+
+  geom_point()
 
 
 #H1
@@ -69,7 +68,14 @@ ggplot(data=diamonds,aes(color,price,fill=color))+
 ggplot(data=diamonds,aes(cut,volume,fill=cut))+
   geom_boxplot()
 
-anova_1 <- aov(volume~cut,data = diamonds)
+anova_1 <- aov(volume ~ cut, data = diamonds)
 summary(anova_1)
 # odrzucamy hipoteze ze wielkosc diamentu ma wplyw na jakosc
 
+
+#H3
+lm_1 <- lm(price ~ table, diamonds)
+summary(lm_1)
+# Jest wyja?niana BARDZO ma?a cz??? wariancji
+plot(lm_1)
+# Wykresy nie wygl?daj? dobrze
