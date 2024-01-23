@@ -104,11 +104,6 @@ Brak widocznej zależności dla ceny za karat.
 ## Kolor a waga diamentu
 
 ```{r}
-# brak zaleznosci: hipoteza do wymiany!
-diamonds$table_group <- cut(diamonds$table, breaks=seq(min(diamonds$table), max(diamonds$table), by=4), include.lowest=T)
-
-diamonds$depth_group <- cut(diamonds$depth, breaks=seq(min(diamonds$depth), max(diamonds$depth), by=6), include.lowest=T)
-
 ggplot(diamonds, aes(color, carat, fill=color)) +
   labs(title='Wykres pudełkowy `') +
   xlab('`table_group`') +
@@ -119,5 +114,14 @@ ggplot(diamonds, aes(color, carat, fill=color)) +
 # Hipoteza 2: waga diamentu zależy od koloru
 
 ```{r}
+ggplot(diamonds, aes(clarity, carat,fill=clarity))+
+  geom_boxplot()
+```
 
+# hipoteza 3 moze cos powiazane z przejrzystoscia l1 oraz kolorem j?
+
+Diamenty z kolorem J oraz poziomem przejrzystości l1 będą miały najwyższą średnią cenę
+
+```{r}
+#jakos to sprawdzic
 ```
