@@ -50,4 +50,49 @@ plot1_clarity <- ggplot(diamonds, aes(carat, price,color=clarity))+
 grid.arrange(plot1_color,plot1_cut,plot1_clarity,nrow=3)
 ```
 
-#hipoteza 1
+Widać dość wyraźny podział na klasy w zależności od przejrzystości oraz lekki podział ze względu na kolor.
+
+Sprawdzimy cenę poszczególnych klas przejrzystości:
+
+```{r}
+ggplot(diamonds,aes(clarity,price,fill=clarity))+
+  geom_boxplot()
+```
+
+Jak widać cena ma pewną zależność od przejrzystości. Problemem może być jednak waga samego diamentu, która może być nieproporcjonalna dla różnych klas przejrzystości. Zdefiniujemy zatem nową zmienną, która objaśniać będzie cenę diamentu za karat.
+
+```{r}
+diamonds$price_carat <- diamonds$price / diamonds$carat
+ggplot(diamonds,aes(clarity,price_carat,fill=clarity))+
+  geom_boxplot()
+```
+
+Cena za karat jednak nie różni się na tyle znacząco, by stwierdzić iż zależy od przejrzystości.
+
+Sprawdźmy jak wygląda sytuacja dla zmiennej 'color'
+
+```{r}
+boxplot_color_price <- ggplot(diamonds,aes(color,price,fill=color))+
+  geom_boxplot()
+boxplot_color_cprice <- ggplot(diamonds,aes(color,price_carat,fill=color))+
+  geom_boxplot()
+
+grid.arrange(boxplot_color_price,boxplot_color_cprice,nrow=2)
+```
+
+Widać pewną zależność ceny od koloru. Brak jakiejkolwiek zależności dla ceny za karat od koloru. Stąd nasza pierwsza hipoteza będzie następująca:
+
+#hipoteza 1: Diamenty koloru J są średnio ponad 2 razy cięższe od diamentów koloru D.
+
+```{r}
+boxplot_cut_price<-ggplot(diamonds,aes(cut,price,fill=cut))+
+  geom_boxplot()
+boxplot_cut_cprice<-ggplot(diamonds,aes(cut,price_carat,fill=cut))+
+  geom_boxplot()
+
+grid.arrange(boxplot_cut_price,boxplot_cut_cprice,nrow=2)
+```
+
+Widać lekkie odchylenie ceny w zależności od rodzaju wycięcia.
+
+Brak widocznej zależności dla ceny za karat.
