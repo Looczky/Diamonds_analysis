@@ -121,3 +121,11 @@ ggplot(diamonds, aes(cut, volume, fill=cut)) +
   xlab('Jakość szlifu') +
   ylab('Objętość') +
   geom_boxplot()
+
+# brak zaleznosci: hipoteza do wymiany!
+diamonds$table_group <- cut(diamonds$table, breaks=seq(min(diamonds$table), max(diamonds$table), by=4), include.lowest=T)
+ggplot(diamonds, aes(cut, table, fill=cut)) +
+  labs(title='Wykres pudełkowy ceny w zależności od `table_group`') +
+  xlab('`table_group`') +
+  ylab('Cena') +
+  geom_boxplot()

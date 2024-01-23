@@ -52,6 +52,8 @@ grid.arrange(plot1_color,plot1_cut,plot1_clarity,nrow=3)
 
 Widać dość wyraźny podział na klasy w zależności od przejrzystości oraz lekki podział ze względu na kolor.
 
+## Sprawdzanie podziałów diamentów na klasy
+
 Sprawdzimy cenę poszczególnych klas przejrzystości:
 
 ```{r}
@@ -84,6 +86,8 @@ Widać pewną zależność ceny od koloru. Brak jakiejkolwiek zależności dla c
 
 #hipoteza 1: Diamenty koloru J są średnio ponad 2 razy cięższe od diamentów koloru D.
 
+Sprawdźmy jak sytuacja wygląda w przypadku różnego rodzaju cięcia.
+
 ```{r}
 boxplot_cut_price<-ggplot(diamonds,aes(cut,price,fill=cut))+
   geom_boxplot()
@@ -96,3 +100,24 @@ grid.arrange(boxplot_cut_price,boxplot_cut_cprice,nrow=2)
 Widać lekkie odchylenie ceny w zależności od rodzaju wycięcia.
 
 Brak widocznej zależności dla ceny za karat.
+
+## Kolor a waga diamentu
+
+```{r}
+# brak zaleznosci: hipoteza do wymiany!
+diamonds$table_group <- cut(diamonds$table, breaks=seq(min(diamonds$table), max(diamonds$table), by=4), include.lowest=T)
+
+diamonds$depth_group <- cut(diamonds$depth, breaks=seq(min(diamonds$depth), max(diamonds$depth), by=6), include.lowest=T)
+
+ggplot(diamonds, aes(color, carat, fill=color)) +
+  labs(title='Wykres pudełkowy `') +
+  xlab('`table_group`') +
+  ylab('Karat') +
+  geom_boxplot()
+```
+
+# Hipoteza 2: waga diamentu zależy od koloru
+
+```{r}
+
+```
