@@ -1,0 +1,290 @@
+# Wstęp
+
+## Import bibliotek i danych
+
+```{r, warning=F, message=F}
+library(ggplot2)
+library(gridExtra)
+
+diamonds <- read.csv('diamonds.csv', colClasses=c(X='NULL'))
+```
+
+W naszym projekcie wykorzystamy zbiór danych zawierający parametry niemal 54 tysięcy diamentów pochodzących z katalogu "Tifanny & Co." z 2017 roku.
+
+## Opis zmiennych
+
+| zmienna   | opis                                                        |
+|:----------|-------------------------------------------------------------|
+| `carat`   | waga diamentu (w karatach)                                  |
+| `cut`     | jakość szlifu diamentu (zmienna kategoryczna)               |
+| `color`   | kolor diamentu (zmienna kategoryczna)                       |
+| `clarity` | poziom przejrzystości diamentu (zmienna kategoryczna)                |
+| `depth`   | proporcja wysokości diamentu do jego obwodu (w %) |
+| `table`   | maksymalna szerokość górnej części diamentu (w mm)          |
+| `x`       | długość diamentu (w mm)                                     |
+| `y`       | szerokość diamentu (w mm)                                   |
+| `z`       | wysokość diamentu (w mm)                                    |
+
+## Wstępne przekształcenia zmiennych
+
+Dostrzegliśmy, że niektóre diamenty nie mają podanych niektórych wymiarów (podana jest wartość 0 mm), dlatego będziemy musieli pozbyć się ich ze zbioru danych.
+
+```{r}
+diamonds$x[diamonds$x == 0] = NA
+diamonds$y[diamonds$y == 0] = NA
+diamonds$z[diamonds$z == 0] = NA
+```
+
+Faktoryzujemy zmienne kategoryczne, a ich wartości ustawiamy w kolejności od "najlepszej" do "najgorszej", co ułatwi potem odczytywanie wykresów.
+
+```{r}
+diamonds$cut <- factor(diamonds$cut, c('Ideal', 'Premium', 'Very Good', 'Good', 'Fair'))
+diamonds$color <- factor(diamonds$color, c('D', 'E', 'F', 'G', 'H', 'I', 'J'))
+diamonds$clarity <- factor(diamonds$clarity, c('IF', 'VVS1', 'VVS2', 'VS1', 'VS2', 'SI1', 'SI2', 'I1'))
+```
+
+Z tak przekształconego zbioru danych usuwamy wszystkie wiersze z wartościami `NA`.
+
+```{r}
+nrow(diamonds)
+diamonds <- na.omit(diamonds)
+nrow(diamonds)
+```
+
+Z naszego zbioru, zawierającego początkowo 53 940 diamentów, usunęliśmy 20, które nie zawierały pewnych parametrów. Stąd naszą analizę przeprowadzimy na pozostałych 53 920 diamentach.
+
+# Analiza eksploracyjna
+
+## Zależności między wymiarami diamentu
+
+Intuicja podpowiada, że wymiary diamentu powinny być ze sobą w jakiś sposób skorelowane. Tezę tę zdaje się potwierdzać macierz korelacji zmiennych `x`, `y`, `z`.
+
+```{r}
+cor(diamonds[c(8:10)])
+```
+Zbudujemy jeszcze modele badające zależności między tymi zmiennymi.
+
+```{r}
+model_0.xy <- lm(x ~ y, diamonds)
+summary(model_0.xy)
+plot_1.xy <- ggplot(diamonds, aes(x, y)) +
+              geom_point() +
+              geom_smooth(method='lm', formula='y~x')
+
+model_0.xz <- lm(x ~ z, diamonds)
+summary(model_0.xz)
+plot_1.xz <- ggplot(diamonds, aes(x, z)) +
+              geom_point() +
+              geom_smooth(method='lm', formula='y~x')
+
+model_0.yz <- lm(y ~ z, diamonds)
+summary(model_0.yz)
+plot_1.yz <- ggplot(diamonds, aes(y, z)) +
+              geom_point() +
+              geom_smooth(method='lm', formula='y~x')
+
+grid.arrange(plot_1.xy, plot_1.xz, plot_1.yz, nrow=3)
+```
+Wszystkie trzy wymiary diamentu są od siebie liniowo zależne. Modele mają istotność statystyczną, a i wariancja jest nimi objaśniana w znacznej części. Na wykresach obserwacje (poza pojedynczymi wyjątkami) układają się wzdłuż linii regresji.
+
+Celem ułatwienia dalszej analizy stworzymy zmienną `volume`, czyli objętość najmniejszego prostopadłościanu, w jakim zmieściłby się dany diament. Zmienną `volume` będziemy dalej nazywać "rozmiarem" diamentu.
+
+```{r}
+diamonds$volume = diamonds$x * diamonds$y * diamonds$z
+```
+
+## Zależność wagi od rozmiaru
+
+Kolejną zależnością, która wydaje się dość oczywista jest wpływ rozmiaru diamentu na liczbę karatów.
+
+```{r, message=F}
+ggplot(diamonds, aes(volume, carat)) +
+  geom_point() +
+  geom_smooth(method='lm')
+```
+```{r}
+model_0.car.vol <- lm(carat ~ volume, diamonds)
+summary(model_0.car.vol)
+```
+
+Wykres i parametry modelu potwierdzają ogromną zależność wagi od rozmiaru diamentu.
+
+## Zależność ceny od wagi
+
+```{r, message=F}
+ggplot(diamonds, aes(carat, price)) +
+  geom_point() +
+  geom_smooth(method='lm')
+```
+
+Na powyższym wykresie widoczna jest zależność ceny od wagi. Sprawdźmy to jeszcze za pomocą modelu liniowego:
+```{r}
+model_price.carat <- lm(price ~ carat, diamonds)
+summary(model_price.carat)
+```
+
+Model jest istotny statystycznie, a do tego objaśnia znaczną część wariancji. Wiemy zatem, ze cena jest liniowo zależna od wagi diamentu. Teraz zobaczmy, jak wykres zależności ceny od wagi prezentuje się z podziałem na kolor, jakość szlifu oraz poziom przejrzystości.
+
+```{r}
+plot_2.color <- ggplot(diamonds, aes(carat, price, color=color)) +
+  labs(title='Cena diamentów w zależności od wagi', subtitle='Uwzględniony podział na kolor') +
+  xlab('Waga') +
+  ylab('Cena') +
+  geom_point()
+plot_2.cut <- ggplot(diamonds, aes(carat, price, color=cut)) +
+  labs(subtitle='Uwzględniony podział na jakość szlifu') +
+  xlab('Waga') +
+  ylab('Cena') +
+  geom_point()
+plot_2.clarity <- ggplot(diamonds, aes(carat, price, color=clarity)) +
+  labs(subtitle='Uwzględniony podział na poziom przejrzystości') +
+  xlab('Waga') +
+  ylab('Cena') +
+  geom_point()
+
+grid.arrange(plot_2.color, plot_2.cut, plot_2.clarity, nrow=3)
+```
+
+Widać dość wyraźny podział na klasy w zależności od przejrzystości oraz lekki podział ze względu na kolor. Zdaje się, że jakość szlifu nie powinna mieć wpływu na cenę.
+
+## Cena diamentu a kolor, poziom przejrzystości i jakość szlifu
+
+Sprawdzimy cenę poszczególnych dla poziomów przejrzystości:
+
+```{r}
+ggplot(diamonds, aes(clarity, price, fill=clarity)) +
+  labs(title='Wykres pudełkowy ceny w zależności od przejrzystości') +
+  xlab('Przejrzystość') +
+  ylab('Cena') +
+  geom_boxplot()
+```
+
+Jak widać cena ma pewną zależność od przejrzystości. Problemem może być jednak waga samego diamentu, która może być nieproporcjonalna dla różnych klas przejrzystości. Zdefiniujemy zatem nową zmienną, która objaśniać będzie cenę diamentu przypadającą na jeden karat jego wagi.
+
+```{r}
+diamonds$price_carat <- diamonds$price / diamonds$carat
+ggplot(diamonds, aes(clarity, price_carat, fill=clarity)) +
+  labs(title='Wykres pudełkowy ceny za karat w zależności od przejrzystości') +
+  xlab('Przejrzystość') +
+  ylab('Dolar na karat') +
+  geom_boxplot()
+```
+
+Cena na karat jednak nie różni się na tyle znacząco, by stwierdzić, iż zależy od przejrzystości.
+
+Sprawdźmy jak wygląda sytuacja dla zmiennej \`color\`.
+
+```{r}
+boxplot_color_price <- ggplot(diamonds, aes(color, price, fill=color)) +
+  labs(title='Wykres pudełkowy ceny w zależności od koloru') +
+  xlab('Kolor') +
+  ylab('Cena') +
+  geom_boxplot()
+
+boxplot_color_cprice <- ggplot(diamonds,aes(color, price_carat, fill=color)) +
+  labs(title='Wykres pudełkowy ceny za karat w zależności od koloru') +
+  xlab('Kolor') +
+  ylab('Dolar za karat') +
+  geom_boxplot()
+
+grid.arrange(boxplot_color_price, boxplot_color_cprice, nrow=2)
+```
+Widać pewną zależność ceny od koloru, jednak brak jakiejkolwiek zależności dla ceny za karat od koloru.
+Sprawdźmy jak wygląda cena przy poszczególnych jakościach szlifu.
+
+```{r}
+boxplot_cut_price <- ggplot(diamonds, aes(cut, price, fill=cut)) +
+  labs(title='Wykres pudełkowy ceny w zależności od jakości szlifu') +
+  xlab('Jakość szlifu') +
+  ylab('Cena') +
+  geom_boxplot()
+
+boxplot_cut_cprice <- ggplot(diamonds, aes(cut, price_carat, fill=cut)) +
+  labs(title='Wykres pudełkowy ceny za karat w zależności od jakości szlifu') +
+  xlab('Jakość szlifu') +
+  ylab('Dolar na karat') +
+  geom_boxplot()
+
+grid.arrange(boxplot_cut_price,boxplot_cut_cprice,nrow=2)
+```
+
+Widać lekkie odchylenie ceny w zależności od jakości szlifu, ale brak widocznej zależności dla ceny za karat.
+
+
+## Waga diamentu a kolor, poziom przejrzystości i jakość szlifu
+
+Powyższe rozważania sugerują nam, że kolor, poziom przejrzystości i jakość szlifu nie mają wpływu na cenę, ale na liniowo od niej zależną wagę diamentu.
+
+```{r}
+ggplot(diamonds, aes(color, carat, fill=color)) +
+  labs(title='Wykres pudełkowy wagi diamentu w zależności od koloru') +
+  xlab('Kolor') +
+  ylab('Waga') +
+  geom_boxplot()
+```
+
+```{r}
+ggplot(diamonds, aes(clarity, carat, fill=clarity)) +
+  labs(title='Wykres pudełkowy wagi diamentu w zależności od przejrzystości') +
+  xlab('Przejrzystość') +
+  ylab('Waga') +
+  geom_boxplot()
+```
+Z powyższych wykresów można wywnioskować, że waga diamentów może mieć zależność od koloru i poziomu przejrzystości. Co ciekawe, to diamenty, których cechy (zmienne kategoryczne) oceniono "najgorzej", na wykresach występują jako najcięższe. To będzie pierwsza z naszych hipotez badawczych. Modele je weryfikujące zbudujemy w dalszej części pracy.
+
+```{r}
+ggplot(diamonds, aes(cut, carat, fill=cut)) +
+  labs(title='Wykres pudełkowy wagi diamentu w zależności od jakości szlifu') +
+  xlab('Jakość szlifu') +
+  ylab('Waga') +
+  geom_boxplot()
+```
+
+Z wykresu można odczytać, że waga nie zmienia się znacznie dla poszczególnych poziomów jakości szlifu.
+
+## Jakość szlifu a rozmiar diamentu
+
+Dotychczas jakość szlifu nie wydawała się być istotną cechą wpływającą na cenę czy wagę diamentu. Zobaczmy, jak sprawa się ma w kontekście rozmiaru
+
+```{r}
+ggplot(diamonds, aes(cut, volume, fill=cut)) +
+  labs(title='Wykres pudełkowy jakości szlifu w zależności od koloru') +
+  xlab('Jakość szlifu') +
+  ylab('Rozmiar') +
+  geom_boxplot()
+```
+
+Jedna obserwacja znacznie odstaje od reszty i utrudnia odczytywanie danych z wykresu. W naszych dalszych badaniach ją pominiemy.
+
+```{r}
+diamonds <- diamonds[-which(diamonds$volume==max(diamonds$volume)),]
+```
+
+Ponownie spójrzmy na ten wykres, teraz powinniśmy móc lepiej odczytać wyniki
+
+```{r}
+ggplot(diamonds, aes(cut, volume, fill=cut)) +
+  labs(title='Wykres pudełkowy jakości szlifu w zależności od koloru') +
+  xlab('Jakość szlifu') +
+  ylab('Rozmiar') +
+  geom_boxplot()
+```
+
+Również rozmiar zdaje się nie wykazwyać żadnej zależności względem jakości szlifu. Zweryfikujemy to w ramach drugiej hipotezy.
+
+# Hipoteza 1: Im gorszy kolor i poziom przejrzystości diamentu, tym większa jego waga
+
+```{r}
+model_1.color <- aov(carat ~ color, diamonds)
+summary.lm(model_1.color)
+```
+
+testy cd.
+
+# Hipoteza 2: Jakość szlifu nie wpływa na rozmiar diamentów
+
+testy
+
+# Hipoteza 3: Na cenę diamentu wpływają wszystkie zmienne poza jakością szlifu
+
+Naszą ostatnią hipotezą będzie sprawdzenie czy wszystkie zmienne (poza jakością szlifu) mają wpływ na cenę diamentu. Zarazem spróbujemy zbudować model najlepiej przewidujący cenę.
