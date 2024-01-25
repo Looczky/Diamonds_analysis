@@ -125,3 +125,16 @@ Diamenty z kolorem J oraz poziomem przejrzystości l1 będą miały najwyższą 
 ```{r}
 #jakos to sprawdzic
 ```
+
+# Sprawdzanie hipotez
+
+## Hipoteza nr 1: Diamenty koloru J są średnio ponad 2 razy cięższe od diamentów koloru D.
+
+```{r}
+diamonds_J <- subset(diamonds,color=='J')
+diamonds_D <- subset(diamonds,color=='D')
+
+t.test(diamonds_J$carat,mu = mean(diamonds_D$carat)*2,alternative = 'greater')
+```
+
+Hipoteza H1 odrzucona, diamenty koloru J wydają się mieć mniejszą średnią wagę niż dwukrotność średniej wagi diamentu koloru D.
