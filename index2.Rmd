@@ -130,23 +130,24 @@ summary(model_price.carat)
 Model jest istotny statystycznie, a do tego objaśnia znaczną część wariancji. Wiemy zatem, ze cena jest liniowo zależna od wagi diamentu. Teraz zobaczmy, jak wykres zależności ceny od wagi prezentuje się z podziałem na kolor, jakość szlifu oraz poziom przejrzystości.
 
 ```{r}
-plot_2.color <- ggplot(diamonds, aes(carat, price, color=color)) +
+plot_2_color <- ggplot(diamonds, aes(carat, price, color=color)) +
   labs(title='Cena diamentów w zależności od wagi', subtitle='Uwzględniony podział na kolor') +
   xlab('Waga') +
   ylab('Cena') +
   geom_point()
-plot_2.cut <- ggplot(diamonds, aes(carat, price, color=cut)) +
+plot_2_cut <- ggplot(diamonds, aes(carat, price, color=cut)) +
   labs(subtitle='Uwzględniony podział na jakość szlifu') +
   xlab('Waga') +
   ylab('Cena') +
   geom_point()
-plot_2.clarity <- ggplot(diamonds, aes(carat, price, color=clarity)) +
+plot_2_clarity <- ggplot(diamonds, aes(carat, price, color=clarity)) +
   labs(subtitle='Uwzględniony podział na poziom przejrzystości') +
   xlab('Waga') +
   ylab('Cena') +
   geom_point()
 
-grid.arrange(plot_2.color, plot_2.cut, plot_2.clarity, nrow=3)
+grid.arrange(plot_2_color, plot_2_cut, plot_2_clarity, nrow=3)
+
 ```
 
 Widać dość wyraźny podział na klasy w zależności od przejrzystości oraz lekki podział ze względu na kolor. Zdaje się, że jakość szlifu nie powinna mieć wpływu na cenę.
@@ -164,6 +165,18 @@ ggplot(diamonds, aes(clarity, price, fill=clarity)) +
 ```
 
 Jak widać cena ma pewną zależność od przejrzystości. Problemem może być jednak waga samego diamentu, która może być nieproporcjonalna dla różnych klas przejrzystości. Zdefiniujemy zatem nową zmienną, która objaśniać będzie cenę diamentu przypadającą na jeden karat jego wagi.
+
+```{r}
+diamonds$price_carat <- diamonds$price / diamonds$carat
+y_lab <- 'Cena za karat'
+
+ plot_3_color <- ggplot(diamonds, aes(carat, price_carat, color=color)) + labs(title='Cena diamentów w zależności od wagi', subtitle='Uwzględniony podział na kolor') + xlab('Waga') + ylab(y_lab) + geom_point() 
+plot_3_cut <- ggplot(diamonds, aes(carat, price_carat, color=cut)) + labs(subtitle='Uwzględniony podział na jakość szlifu') + xlab('Waga') + ylab(y_lab) + geom_point() 
+plot_3_clarity <- ggplot(diamonds, aes(carat, price_carat, color=clarity)) + labs(subtitle='Uwzględniony podział na poziom przejrzystości') + xlab('Waga') + ylab(y_lab) + geom_point()
+
+grid.arrange(plot_3_color, plot_3_cut, plot_3_clarity, nrow=3)
+
+```
 
 ```{r}
 diamonds$price_carat <- diamonds$price / diamonds$carat
@@ -213,6 +226,11 @@ grid.arrange(boxplot_cut_price,boxplot_cut_cprice,nrow=2)
 ```
 
 Widać lekkie odchylenie ceny w zależności od jakości szlifu, ale brak widocznej zależności dla ceny za karat.
+
+```{r}
+
+
+```
 
 ## Waga diamentu a kolor, poziom przejrzystości i jakość szlifu
 
