@@ -279,11 +279,11 @@ Również rozmiar zdaje się nie wykazwyać żadnej zależności względem jako�
 # Hipoteza 1: Im gorszy kolor i poziom przejrzystości diamentu, tym większa jego waga
 
 ```{r}
-model_1.color <- aov(carat ~ color, diamonds)
-print(summary.lm(model_1.color))
+model_1_color <- aov(carat ~ color, diamonds)
+print(summary.lm(model_1_color))
 
-model_1.clarity <- aov(carat ~ clarity, diamonds)
-print(summary.lm(model_1.clarity))
+model_1_clarity <- aov(carat ~ clarity, diamonds)
+print(summary.lm(model_1_clarity))
 
 ```
 
@@ -298,8 +298,15 @@ Model jest w stanie wyznaczyć \~ 23 % wariancji
 
 # Hipoteza 2: Jakość szlifu nie wpływa na rozmiar diamentów
 
-testy
+```{r}
+model_2_cut <- aov(volume ~ cut, diamonds)
+print(summary.lm(model_2_cut))
+# no troche wyplywa
+
+```
 
 # Hipoteza 3: Na cenę diamentu wpływają wszystkie zmienne poza jakością szlifu
+
+Hipoteza do bani, bo poprzednia mowi ze wpływa na rozmiar, czyli tez na cene
 
 Naszą ostatnią hipotezą będzie sprawdzenie czy wszystkie zmienne (poza jakością szlifu) mają wpływ na cenę diamentu. Zarazem spróbujemy zbudować model najlepiej przewidujący cenę.
