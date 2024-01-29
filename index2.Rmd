@@ -323,6 +323,94 @@ print(summary.lm(model_2_cut))
 
 ```
 
+Model wykazuje istotne różnice między poszczególnymi jakościami cięcia. Wartość $R^2$ jest natomiast bardzo mała - wynosi około 3 %, co może sugerować, że inne zmienne wpływają na zmienną rozmiar diamentu.
+
+Posortujmy szlif według współczynnika malejąco:
+
+Fair
+
+Premium
+
+Good
+
+Very Good
+
+Sprawdźmy, czy któraś zmienna wpływa na jakość szlifu, tzn. czy dana jakość szlifu jest powiązana z innymi zmiennymi, które w konsekwencji mogą mieć wpływ na rozmiar.
+
+```{r}
+ggplot(diamonds,aes(carat,cut,fill=cut))+
+  geom_boxplot()
+
+```
+
+Mamy również tą samą kolejność:
+
+Fair
+
+Premium
+
+Good
+
+Very good
+
+Ideal
+
+Waga ma dość istotny wpływ na jakość szlifu, sprawdźmy, czy jest skorelowana modelem ANOVA
+
+```{r}
+carat_cut_ANOVA <- aov(carat~cut,diamonds)
+summary.lm(carat_cut_ANOVA)
+
+
+```
+
+Słabo
+
+Być może kolor jest powiązany z jakością cięcia:
+
+```{r}
+table(diamonds$cut,diamonds$color)
+chisq.test(diamonds$cut,diamonds$color)
+```
+
+Jest pewna korelacja sprawdźmy model
+
+```{r}
+color_volume_ANOVA <- aov(volume~color,diamonds)
+summary.lm(color_volume_ANOVA)
+```
+
+Kolor wyjaśnia ponad trzykrotnie więcej wariancji, niż jakość szlifu.
+
+```{r}
+table(diamonds$cut,diamonds$color)
+chisq.test(diamonds$cut,diamonds$color)
+
+clarity_volume_ANOVA <- aov(volume~clarity,diamonds)
+summary.lm(clarity_volume_ANOVA)
+```
+
+Jakość szlifu jest powiązana z przejrzystością.
+
+Przejrzystość wyjaśnia ponad 13 % wariancji.
+
+Sprawdźmy, czy dodając jakość szlifu do modelu istotnie zmieni się $R^2$:
+
+```{r}
+ANOVA_1<- aov(volume~color+cut,diamonds)
+ANOVA_2<- aov(volume~clarity+cut,diamonds)
+ANOVA_3<- aov(volume~color+clarity,diamonds)
+ANOVA_4<- aov(volume~color+clarity+cut,diamonds)
+summary.lm(ANOVA_1)
+summary.lm(ANOVA_2)
+summary.lm(ANOVA_3)
+summary.lm(ANOVA_4)
+```
+
+Okazuje się, że model wykorzystując jedynie kolor oraz przejrzystość diamentu jest w stanie uzyskać $R^2$ na poziomie \~ 22.3 %, dodanie jakości szlifu do modelu polepsza model o około jedynie \~ 0.8 %, co wskazuje na dość istotny wpływ omówionych zmiennych na zmienną 'cut'.
+
+Wniosek: Hipotezę przyjmujemy za prawdziwą.
+
 # Hipoteza 3: Na cenę diamentu wpływają wszystkie zmienne poza jakością szlifu
 
 Hipoteza do bani, bo poprzednia mowi ze wpływa na rozmiar, czyli tez na cene
