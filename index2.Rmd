@@ -305,7 +305,7 @@ print(summary.lm(model_1_clarity))
 
 ```
 
-Modele zdają się wskazywać na pewne powiązanie wagi z kolorem oraz przejrzystością. Sam kolor jest w stanie wyjaśnić \~ 9 % całkowitej wariancji, natomiast przejrzystość \~ 14 %. Sprawdźmy, jaki ułamek wariancji potrafi przewidzieć model uwzględniając obie zmienne:
+Modele zdają się wskazywać na pewne powiązanie wagi z kolorem oraz przejrzystością. Ponadto widzimy stopniowy wzrost współczynnika przy odpowiednio coraz gorszej przejrzystości. Sam kolor jest w stanie wyjaśnić \~ 9 % całkowitej wariancji, natomiast przejrzystość \~ 14 %. Sprawdźmy, jaki ułamek wariancji potrafi przewidzieć model uwzględniając obie zmienne:
 
 ```{r}
 model_1_both <- aov(carat ~ color + clarity, diamonds)
@@ -313,6 +313,16 @@ print(summary.lm(model_1_both))
 ```
 
 Model jest w stanie wyznaczyć \~ 23 % wariancji
+
+```{r}
+ggplot(diamonds, aes(x = interaction(color, clarity), y = carat)) +
+  geom_boxplot(fill = "lightblue", color = "blue") +
+  labs(x = "Kombinacja Koloru i Klarowności", y = "Waga Diamentu (carat)",
+       title = "Boxplot z Interakcjami dla Wagi Diamentu") +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+```
+
+Jak widać na powyższym wykresie, kolor i przejrzystość mają dość istotny wpływ na wagę.
 
 # Hipoteza 2: Jakość szlifu nie wpływa na rozmiar diamentów
 
@@ -355,7 +365,7 @@ Very good
 
 Ideal
 
-Waga ma dość istotny wpływ na jakość szlifu, sprawdźmy, czy jest skorelowana modelem ANOVA
+Waga wydaje się być skorelowana z jakością szlifu, sprawdźmy, czy jest skorelowana modelem ANOVA
 
 ```{r}
 carat_cut_ANOVA <- aov(carat~cut,diamonds)
