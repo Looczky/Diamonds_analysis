@@ -315,11 +315,12 @@ print(summary.lm(model_1_both))
 Model jest w stanie wyznaczyć \~ 23 % wariancji
 
 ```{r}
-ggplot(diamonds, aes(x = interaction(color, clarity), y = carat)) +
-  geom_boxplot(fill = "lightblue", color = "blue") +
+ggplot(diamonds, aes(x = interaction(color, clarity), y = carat, fill = color)) +
+  geom_boxplot(color = "black") +
   labs(x = "Kombinacja Koloru i Klarowności", y = "Waga Diamentu (carat)",
        title = "Boxplot z Interakcjami dla Wagi Diamentu") +
-  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  scale_fill_brewer(palette = "Blues")
 ```
 
 Jak widać na powyższym wykresie, kolor i przejrzystość mają dość istotny wpływ na wagę.
