@@ -88,26 +88,26 @@ cor(diamonds[c(8:10)])
 Zbudujemy jeszcze modele badające zależności między tymi zmiennymi.
 
 ```{r}
-model_0.xy <- lm(x ~ y, diamonds)
-summary(model_0.xy)
-plot_1.xy <- ggplot(diamonds, aes(x, y)) +
+model_1_xy <- lm(x ~ y, diamonds)
+summary(model_1_xy)
+plot_1_xy <- ggplot(diamonds, aes(x, y)) +
               geom_point() +
               geom_smooth(method='lm', formula='y~x') +
               labs(title='Wykresy zależności między wymiarami diamentów')
 
-model_0.xz <- lm(x ~ z, diamonds)
-summary(model_0.xz)
-plot_1.xz <- ggplot(diamonds, aes(x, z)) +
+model_1_xz <- lm(x ~ z, diamonds)
+summary(model_1_xz)
+plot_1_xz <- ggplot(diamonds, aes(x, z)) +
               geom_point() +
               geom_smooth(method='lm', formula='y~x')
 
-model_0.yz <- lm(y ~ z, diamonds)
-summary(model_0.yz)
-plot_1.yz <- ggplot(diamonds, aes(y, z)) +
+model_1_yz <- lm(y ~ z, diamonds)
+summary(model_1_yz)
+plot_1_yz <- ggplot(diamonds, aes(y, z)) +
               geom_point() +
               geom_smooth(method='lm', formula='y~x')
 
-grid.arrange(plot_1.xy, plot_1.xz, plot_1.yz, nrow=3)
+grid.arrange(plot_1_xy, plot_1_xz, plot_1_yz, nrow=3)
 ```
 
 Wszystkie trzy wymiary diamentu są od siebie liniowo zależne. Modele mają istotność statystyczną, a i wariancja jest nimi objaśniana w znacznej części. Na wykresach obserwacje (poza pojedynczymi wyjątkami) układają się wzdłuż linii regresji.
@@ -115,7 +115,7 @@ Wszystkie trzy wymiary diamentu są od siebie liniowo zależne. Modele mają ist
 Celem ułatwienia dalszej analizy stworzymy zmienną `volume`, czyli objętość najmniejszego prostopadłościanu, w jakim zmieściłby się dany diament. Zmienną `volume` będziemy dalej nazywać "rozmiarem" diamentu.
 
 ```{r}
-diamonds$volume = diamonds$x * diamonds$y * diamonds$z
+diamonds$volume <- diamonds$x * diamonds$y * diamonds$z
 ```
 
 ## Zależność wagi od rozmiaru
@@ -132,8 +132,8 @@ ggplot(diamonds, aes(volume, carat)) +
 ```
 
 ```{r}
-model_0.car.vol <- lm(carat ~ volume, diamonds)
-summary(model_0.car.vol)
+model_2 <- lm(carat ~ volume, diamonds)
+summary(model_2)
 ```
 
 Wykres i parametry modelu potwierdzają ogromną zależność wagi od rozmiaru diamentu, gdyż $R^{2}$ wynosi aż 95,7%.
@@ -152,8 +152,8 @@ ggplot(diamonds, aes(carat, price)) +
 Na powyższym wykresie widoczna jest zależność ceny od wagi. Sprawdźmy to jeszcze za pomocą modelu liniowego:
 
 ```{r}
-model_price_carat <- lm(price ~ carat, diamonds)
-summary(model_price_carat)
+model_H3 <- lm(price ~ carat, diamonds)
+summary(model_H3)
 ```
 
 Model jest istotny statystycznie, a do tego objaśnia znaczną część wariancji. Wiemy zatem, że cena jest liniowo zależna od wagi diamentu. Teraz zobaczmy, jak wykres zależności ceny od wagi prezentuje się z podziałem na kolor, jakość szlifu oraz poziom przejrzystości.
@@ -176,7 +176,6 @@ plot_2_clarity <- ggplot(diamonds, aes(carat, price, color=clarity)) +
   geom_point()
 
 grid.arrange(plot_2_color, plot_2_cut, plot_2_clarity, nrow=3)
-
 ```
 
 Widać dość wyraźny podział na klasy w zależności od przejrzystości oraz lekki podział ze względu na kolor. Zdaje się, że jakość szlifu nie powinna mieć wpływu na cenę.
@@ -197,24 +196,23 @@ Jak widać, cena ma pewną zależność od przejrzystości. Problemem może być
 
 ```{r}
 diamonds$price_carat <- diamonds$price / diamonds$carat
-y_lab <- 'Cena za karat'
 
 plot_3_color <- ggplot(diamonds, aes(carat, price_carat, color=color)) +
   labs(title='Cena diamentów w zależności od wagi', subtitle='Uwzględniony podział na kolor') +
   xlab('Waga') +
-  ylab(y_lab) +
+  ylab('Cena za karat') +
   geom_point() 
 
 plot_3_cut <- ggplot(diamonds, aes(carat, price_carat, color=cut)) +
   labs(subtitle='Uwzględniony podział na jakość szlifu') +
   xlab('Waga') +
-  ylab(y_lab) +
+  ylab('Cena za karat') +
   geom_point() 
 
 plot_3_clarity <- ggplot(diamonds, aes(carat, price_carat, color=clarity)) +
   labs(subtitle='Uwzględniony podział na poziom przejrzystości') +
   xlab('Waga') +
-  ylab(y_lab) +
+  ylab('Cena za karat') +
   geom_point()
 
 grid.arrange(plot_3_color, plot_3_cut, plot_3_clarity, nrow=3)
@@ -235,37 +233,37 @@ Cena na karat jednak nie różni się na tyle znacząco, by stwierdzić, iż zal
 Sprawdźmy, jak wygląda sytuacja dla zmiennej \`color\`.
 
 ```{r}
-boxplot_color_price <- ggplot(diamonds, aes(color, price, fill=color)) +
+plot_4_price <- ggplot(diamonds, aes(color, price, fill=color)) +
   labs(title='Wykres pudełkowy ceny w zależności od koloru') +
   xlab('Kolor') +
   ylab('Cena') +
   geom_boxplot()
 
-boxplot_color_cprice <- ggplot(diamonds,aes(color, price_carat, fill=color)) +
+plot_4_pricecarat <- ggplot(diamonds,aes(color, price_carat, fill=color)) +
   labs(title='Wykres pudełkowy ceny za karat w zależności od koloru') +
   xlab('Kolor') +
   ylab('Dolar za karat') +
   geom_boxplot()
 
-grid.arrange(boxplot_color_price, boxplot_color_cprice, nrow=2)
+grid.arrange(plot_4_price, plot_4_pricecarat, nrow=2)
 ```
 
 Widać pewną zależność ceny od koloru, jednak brak jakiejkolwiek zależności dla ceny za karat od koloru. Ponownie, pewne diamenty zdają się mieć większą wagę, tym razem w zależności od koloru. Sprawdźmy jak wygląda cena przy poszczególnych jakościach szlifu.
 
 ```{r}
-boxplot_cut_price <- ggplot(diamonds, aes(cut, price, fill=cut)) +
+plot_5_price <- ggplot(diamonds, aes(cut, price, fill=cut)) +
   labs(title='Wykres pudełkowy ceny w zależności od jakości szlifu') +
   xlab('Jakość szlifu') +
   ylab('Cena') +
   geom_boxplot()
 
-boxplot_cut_cprice <- ggplot(diamonds, aes(cut, price_carat, fill=cut)) +
+plot_5_pricecarat <- ggplot(diamonds, aes(cut, price_carat, fill=cut)) +
   labs(title='Wykres pudełkowy ceny za karat w zależności od jakości szlifu') +
   xlab('Jakość szlifu') +
   ylab('Dolar na karat') +
   geom_boxplot()
 
-grid.arrange(boxplot_cut_price,boxplot_cut_cprice,nrow=2)
+grid.arrange(plot_5_price, plot_5_pricecarat, nrow=2)
 ```
 
 Widać lekkie odchylenie ceny w zależności od jakości szlifu, ale brak widocznej zależności dla ceny za karat.
@@ -335,19 +333,19 @@ Również rozmiar zdaje się nie wykazwyać liniowej zależności względem jako
 # Hipoteza 1: Im gorszy kolor i poziom przejrzystości diamentu, tym większa jego waga
 
 ```{r}
-model_1_color <- aov(carat ~ color, diamonds)
-print(summary.lm(model_1_color))
+model_H1_color <- aov(carat ~ color, diamonds)
+print(summary.lm(model_H1_color))
 
-model_1_clarity <- aov(carat ~ clarity, diamonds)
-print(summary.lm(model_1_clarity))
+model_H1_clarity <- aov(carat ~ clarity, diamonds)
+print(summary.lm(model_H1_clarity))
 
 ```
 
 Modele zdają się wskazywać na pewne powiązanie wagi z kolorem oraz przejrzystością. Ponadto widzimy stopniowy wzrost współczynnika przy odpowiednio coraz gorszej przejrzystości. Sam kolor jest w stanie wyjaśnić \~ 9 % całkowitej wariancji, natomiast przejrzystość \~ 14 %. Sprawdźmy, jaki ułamek wariancji potrafi przewidzieć model uwzględniający obie zmienne:
 
 ```{r}
-model_1_both <- aov(carat ~ color + clarity, diamonds)
-print(summary.lm(model_1_both))
+model_H1_both <- aov(carat ~ color + clarity, diamonds)
+print(summary.lm(model_H1_both))
 ```
 
 Model jest w stanie wyznaczyć \~23% wariancji
@@ -369,8 +367,8 @@ Hipotezę przyjmujemy za prawdziwą.
 # Hipoteza 2: Jakość szlifu nie wpływa na rozmiar diamentów
 
 ```{r}
-model_2_cut <- aov(volume ~ cut, diamonds)
-print(summary.lm(model_2_cut))
+model_H2_cut <- aov(volume ~ cut, diamonds)
+print(summary.lm(model_H2_cut))
 ```
 
 Model wykazuje istotne różnice między poszczególnymi jakościami cięcia. Wartość $R^2$ jest natomiast bardzo mała - wynosi około 3%, co może sugerować, że inne zmienne wpływają na zmienną rozmiar diamentu.
@@ -390,7 +388,7 @@ Ideal
 Sprawdźmy, czy któraś zmienna wpływa na jakość szlifu, tzn. czy dana jakość szlifu jest powiązana z innymi zmiennymi, które w konsekwencji mogą mieć wpływ na rozmiar.
 
 ```{r}
-ggplot(diamonds,aes(carat, cut, fill=cut)) +
+ggplot(diamonds, aes(carat, cut, fill=cut)) +
   labs(title='Wykres pudełkowy wagi w zależności od jakości szlifu') +
   xlab('Waga') +
   ylab('Jakość szlifu') +
@@ -399,8 +397,8 @@ ggplot(diamonds,aes(carat, cut, fill=cut)) +
 ```
 
 ```{r}
-model_2_carat_cut <- aov(carat ~ cut, diamonds)
-print(summary.lm(model_2_carat_cut))
+model_H2_carat_cut <- aov(carat ~ cut, diamonds)
+print(summary.lm(model_H2_carat_cut))
 ```
 
 Mamy tę samą kolejność:
@@ -418,8 +416,8 @@ Ideal
 Waga wydaje się być skorelowana z jakością szlifu, sprawdźmy, czy jest skorelowana modelem ANOVA.
 
 ```{r}
-carat_cut_ANOVA <- aov(carat ~ cut, diamonds)
-summary.lm(carat_cut_ANOVA)
+anova_H2_carat_cut <- aov(carat ~ cut, diamonds)
+summary.lm(anova_H2_carat_cut)
 ```
 
 $R^2$ na poziomie \~0.035 wskazuje, że cięcie może nie być zbyt istotnym czynnikiem wpływającym na wagę diamentu.
@@ -434,8 +432,8 @@ chisq.test(diamonds$cut, diamonds$color)
 P-value \< 0.05. Jest pewne powiązanie, sprawdźmy więc model.
 
 ```{r}
-color_volume_ANOVA <- aov(volume ~ color, diamonds)
-summary.lm(color_volume_ANOVA)
+anova_H2_color <- aov(volume ~ color, diamonds)
+summary.lm(anova_H2_color)
 ```
 
 Kolor wyjaśnia ponad trzykrotnie więcej wariancji, niż jakość szlifu.
@@ -444,8 +442,8 @@ Kolor wyjaśnia ponad trzykrotnie więcej wariancji, niż jakość szlifu.
 table(diamonds$cut, diamonds$color)
 chisq.test(diamonds$cut, diamonds$color)
 
-clarity_volume_ANOVA <- aov(volume ~ clarity, diamonds)
-summary.lm(clarity_volume_ANOVA)
+anova_H2_clarity <- aov(volume ~ clarity, diamonds)
+summary.lm(anova_H2_clarity)
 ```
 
 Jakość szlifu jest powiązana z przejrzystością. Przejrzystość wyjaśnia ponad 13% wariancji.
@@ -453,15 +451,15 @@ Jakość szlifu jest powiązana z przejrzystością. Przejrzystość wyjaśnia p
 Sprawdźmy, czy dodając jakość szlifu do modelu istotnie zmieni się $R^2$:
 
 ```{r}
-ANOVA_1 <- aov(volume ~ color + cut, diamonds)
-ANOVA_2 <- aov(volume ~ clarity + cut, diamonds)
-ANOVA_3 <- aov(volume ~ color + clarity, diamonds)
-ANOVA_4 <- aov(volume ~ color + clarity + cut, diamonds)
+anova_H2_1 <- aov(volume ~ color + cut, diamonds)
+anova_H2_2 <- aov(volume ~ clarity + cut, diamonds)
+anova_H2_3 <- aov(volume ~ color + clarity, diamonds)
+anova_H2_4 <- aov(volume ~ color + clarity + cut, diamonds)
 
-summary.lm(ANOVA_1)
-summary.lm(ANOVA_2)
-summary.lm(ANOVA_3)
-summary.lm(ANOVA_4)
+summary.lm(anova_H2_1)
+summary.lm(anova_H2_2)
+summary.lm(anova_H2_3)
+summary.lm(anova_H2_4)
 ```
 
 Okazuje się, że model wykorzystując jedynie kolor oraz przejrzystość diamentu jest w stanie uzyskać $R^2$ na poziomie \~22.3%, dodanie jakości szlifu do modelu polepsza model o jedyne \~0.8 %, co wskazuje na dość istotny wpływ omówionych zmiennych na zmienną 'cut'.
@@ -477,26 +475,26 @@ ggplot(diamonds, aes(table, depth)) +
   labs(title='Zależność zmiennej depth od table') +
   geom_point()
 
-model_3 <- lm(depth ~ table, diamonds)
-summary.lm(model_3)
+model_H3 <- lm(depth ~ table, diamonds)
+summary.lm(model_H3)
 ```
 
 Dla takiego modelu zachodzi istotność statystyczna, jednakże $R^2$ wynosi zaledwie niecałe 9%. Spróbujmy znaleźć zmienną towarzyszącą, która mogłaby ten parametr poprawić.
 
 ```{r}
-plot_4_color <- ggplot(diamonds, aes(table, depth, color=color)) +
+plot_6_color <- ggplot(diamonds, aes(table, depth, color=color)) +
   labs(title='Zależność zmiennej depth od table', subtitle='Uwzględniony podział na kolor') +
   geom_point()
 
-plot_4_cut <- ggplot(diamonds, aes(table, depth, color=cut)) +
+plot_6_cut <- ggplot(diamonds, aes(table, depth, color=cut)) +
   labs(subtitle='Uwzględniony podział na jakość szlifu') +
   geom_point()
 
-plot_4_clarity <- ggplot(diamonds, aes(table, depth, color=clarity)) +
+plot_6_clarity <- ggplot(diamonds, aes(table, depth, color=clarity)) +
   labs(subtitle='Uwzględniony podział na poziom przejrzystości') +
   geom_point()
 
-grid.arrange(plot_4_color, plot_4_cut, plot_4_clarity, nrow=3)
+grid.arrange(plot_6_color, plot_6_cut, plot_6_clarity, nrow=3)
 ```
 
 Zmienna jakości szlifu zdaje się układać na wykresie znacznie mniej chaotycznie od pozostałych. Przyjrzyjmy się jej na wykresie z liniami regresji dla poszczególnych poziomów jakości szlifu.
@@ -510,15 +508,15 @@ ggplot(diamonds, aes(table, depth, color=cut)) +
 Spróbujmy zbudować model z uwzględnieniem zmiennej `cut`.
 
 ```{r}
-model_3_cut <- lm(depth ~ table + cut, diamonds)
-summary.lm(model_3_cut)
+model_H3_cut <- lm(depth ~ table + cut, diamonds)
+summary.lm(model_H3_cut)
 ```
 
 Zmienna `cut` pozwala na objaśnienie \~26% wariancji. Sprawdźmy, czy zaimplementowanie interakcji będzie zasadne.
 
 ```{r}
-model_3_cut2 <- lm(depth ~ table * cut, diamonds)
-summary.lm(model_3_cut2)
+model_H3_cut_2 <- lm(depth ~ table * cut, diamonds)
+summary.lm(model_H3_cut_2)
 ```
 
 Model z interakcją radzi sobie nieco lepiej. Interakcje między `table` a każdą przyjmowaną przez `cut` wartością są istotne statystycznie.
@@ -526,11 +524,11 @@ Model z interakcją radzi sobie nieco lepiej. Interakcje między `table` a każd
 Sprawdźmy jeszcze, czy aby na pewno użycie zmiennych towarzyszących `clarity` i `color` nie da lepszego efektu.
 
 ```{r}
-model_3_color <- lm(depth ~ table + color, diamonds)
-summary.lm(model_3_color)
+model_H3_color <- lm(depth ~ table + color, diamonds)
+summary.lm(model_H3_color)
 
-model_3_clarity <- lm(depth ~ table + clarity, diamonds)
-summary.lm(model_3_clarity)
+model_H3_clarity <- lm(depth ~ table + clarity, diamonds)
+summary.lm(model_H3_clarity)
 ```
 
 Modele nie radzą sobie tak dobrze, jak ten ze zmienną `cut`. Zatem szerokość górnej części diamentu wpływa na proporcję wysokości diamentu do jego obwodu, jednak dobrze jest uwzględnić zmienną towarzyszącą jakości szlifu, co pozwala na lepsze objaśnianie wariancji zmiennej celu.
